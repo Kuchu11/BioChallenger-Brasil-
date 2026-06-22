@@ -1,2 +1,2 @@
 # BioChallenger-Brasil-
-Em Desenvolvimento Ativo 🚀
+Em Desenvolvimento 🚀
