@@ -8,8 +8,11 @@ export function LoginPage() {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (username === "admin" && password === "admin") {
+    
+    if (username.toLowerCase() === "admin") {
       navigate("/gestao");
+    } else {
+      navigate("/triagem");
     }
   }
 
@@ -31,6 +34,7 @@ export function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full rounded-md border border-border bg-input-background px-3 py-2 text-foreground focus:border-primary focus:outline-none"
+              placeholder="Digite seu usuário (ex: enfermeiro ou admin)"
               required
             />
           </div>
