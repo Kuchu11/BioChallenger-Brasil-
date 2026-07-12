@@ -1,75 +1,45 @@
-# React + TypeScript + Vite
+# 🔬 SentiNela Saúde
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Plataforma Integrada de Vigilância Epidemiológica e Inteligência Territorial**  
+> Desenvolvido como solução tecnológica para monitoramento ágil de surtos e suporte à Atenção Primária à Saúde (APS).
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 💻 Sobre o Projeto
 
-## React Compiler
+O **SentiNela Saúde** é um ecossistema digital desenvolvido para otimizar o fluxo de captação de dados sintomáticos, triagem clínica e tomada de decisões estratégicas na gestão de saúde pública. Substituindo fluxos manuais por análises territoriais em tempo real, a plataforma conecta a triagem de acolhimento diretamente à gestão epidemiológica municipal.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Arquitetura Funcional do Sistema
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+O sistema divide-se em três perfis integrados de acesso:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 1. Fila de Acolhimento & Triagem (Enfermagem)
+* **Checklist Sentinela:** Mapeamento imediato de síndromes clínicas divididas em blocos estratégicos (*Febril*, *Respiratório* e *Gastrointestinal*).
+* **Integração Territorial:** Coleta e vinculação automatizada de dados pelo Cartão Nacional do SUS, permitindo atualização dinâmica de localização e remapeamento de microáreas críticas por CEP.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 2. Consultório e Diagnóstico (Médico)
+* **Inteligência Territorial Integrada:** O prontuário médico exibe um mapa dinâmico da residência do cidadão com avisos em tempo real indicando se aquela localidade específica enfrenta estabilidade ou risco iminente de surto.
+* **Notificação Epidemiológica:** Disparo imediato de alertas clínicos para o painel central da gestão ao identificar padrões suspeitos.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 3. Painel de Monitoramento Geral (Gestão)
+* **Mapa de Calor:** Renderização reativa de focos de contágio geográficos baseados em mapas reais, permitindo navegação fluida e foco interativo por unidade de saúde.
+* **Segurança e LGPD:** Anonimização de dados nominais coletivos com acesso restrito e auditado via barreira de autenticação eletrônica (senha de gestor).
+* **Ações de Campo Separadas:**
+  * **Comunicação Direta:** Disparo automatizado de alertas de prevenção para o WhatsApp dos vigilantes comunitários locais.
+  * **Investigação Epidemiológica de Campo:** Modais de autorização assinados eletronicamente para despachar equipes técnicas para busca ativa e controle de surtos.
 
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Tecnologias Utilizadas
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+O ecossistema foi construído utilizando práticas modernas de desenvolvimento web:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* **React** (Componentização reativa e gerenciamento de estados dinâmicos)
+* **TypeScript** (Tipagem estática e segurança de compilação)
+* **Vite** (Build e Hot Module Replacement ultra veloz)
+* **Tailwind CSS** (Estilização utilitária de alta performance e suporte a Dark Mode)
+* **React Leaflet / Leaflet** (Renderização e manipulação de mapas geográficos baseados em OpenStreetMap)
 
-```
+---
