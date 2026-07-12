@@ -2,12 +2,11 @@ import React, { createContext, useContext, useState } from "react";
 
 export interface Patient {
   name: string;
-  age: string;
-  bloodPressure: string;
-  heartRate: string;
-  temperature: string;
+  cpf: string;
+  susCard: string;
+  symptomsList: string[]; // Lista de nomes dos sintomas checados
+  symptoms: string;       // Observações clínicas em texto livre
   riskLevel: "blue" | "green" | "yellow" | "orange" | "red";
-  symptoms: string;
 }
 
 interface AttendanceContextType {
