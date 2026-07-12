@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 export function GestaoPage() {
   const [period, setPeriod] = useState("hoje");
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -12,7 +14,7 @@ export function GestaoPage() {
             <h1 className="text-2xl font-medium text-foreground">Painel de Gestão e Indicadores</h1>
             <p className="text-sm text-muted-foreground mt-1">Monitoramento de fluxo e produtividade da unidade de saúde</p>
           </div>
-          <div>
+          <div className="flex items-center gap-3">
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
@@ -22,6 +24,13 @@ export function GestaoPage() {
               <option value="semana">Últimos 7 dias</option>
               <option value="mes">Últimos 30 dias</option>
             </select>
+
+            <button
+              onClick={() => navigate("/")}
+              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 shadow-sm focus:outline-none uppercase tracking-wider"
+            >
+              Sair
+            </button>
           </div>
         </div>
 
@@ -52,7 +61,6 @@ export function GestaoPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          
           <div className="rounded-lg border border-border bg-card p-6 shadow-sm lg:col-span-2">
             <h3 className="text-lg font-medium text-foreground mb-4">Fluxo de Pacientes por Classificação</h3>
             <div className="space-y-4">
@@ -127,7 +135,6 @@ export function GestaoPage() {
               </div>
             </div>
           </div>
-
         </div>
 
       </div>
