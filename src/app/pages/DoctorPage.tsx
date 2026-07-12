@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAttendance } from "../context/AttendanceContext";
 import { RealGeographicMap } from "../components/RealGeographicMap";
+import { Navbar } from "../components/Navbar";
 
 export function DoctorPage() {
   const { queue, currentPatient, setCurrentPatient, removePatientFromQueue } = useAttendance();
@@ -50,8 +51,11 @@ export function DoctorPage() {
   const activeSyndrome = currentPatient?.syndromeLabel || "Síndrome Febril";
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 p-6 font-sans transition-colors duration-200">
-      <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 font-sans transition-colors duration-200">
+      
+      <Navbar userType="doctor" queueLength={queue.length} />
+
+      <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         
         <div className="lg:col-span-2 space-y-6">
           

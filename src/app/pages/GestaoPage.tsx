@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { RealGeographicMap } from "../components/RealGeographicMap";
+import { Navbar } from "../components/Navbar";
 
 interface DetailedPatient {
   id: string;
@@ -85,23 +86,16 @@ export function GestaoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 p-6 font-sans transition-colors duration-200">
-      <div className="mx-auto max-w-7xl space-y-6">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 font-sans transition-colors duration-200">
+      
+      <Navbar userType="gestor" queueLength={metrics.totalCases} />
+
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
         
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-200/60 dark:border-neutral-800 pb-5">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#64748b] dark:text-neutral-400">
-              <span>Gestão de Saúde Municipal</span>
-              <span className="text-slate-300">•</span>
-              <span>Vigilância Epidemiológica</span>
-              <span className="text-slate-300">•</span>
-              <span>03/07/2026</span>
-            </div>
-            <h1 className="text-2xl font-bold text-[#1e293b] dark:text-neutral-50 mt-1 flex items-center gap-2">
-              SentiNela Saúde
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200/30">
-                <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse"></span> SISTEMA ATIVO
-              </span>
+            <h1 className="text-xl font-bold text-[#1e293b] dark:text-neutral-50 mt-1 flex items-center gap-2">
+              Painel de Monitoramento Geral
             </h1>
           </div>
 
@@ -275,6 +269,7 @@ export function GestaoPage() {
                       <td className="p-4">{item.unit}</td>
                       <td className="p-4">
                         <button 
+                          type="button"
                           onClick={() => handleOpenLock(item)} 
                           className="border border-slate-200 dark:border-neutral-700 px-2.5 py-1 rounded-md text-[11px] hover:bg-slate-50 dark:hover:bg-neutral-800 cursor-pointer flex items-center gap-1"
                         >
@@ -306,7 +301,7 @@ export function GestaoPage() {
                     <h4 className="text-sm font-bold text-slate-800 dark:text-neutral-50">Jardim Esperança</h4>
                     <span className="bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded text-[10px] uppercase">Urgente</span>
                   </div>
-                  <p className="text-xs text-slate-400">28 notificações recentes • Síndrome: <span className="font-bold text-red-600">Respiratória</span></p>
+                  <p className="text-xs text-slate-400">28 notifications recentes • Síndrome: <span className="font-bold text-red-600">Respiratória</span></p>
                   <div className="bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg border border-slate-100 dark:border-neutral-700 font-mono text-[11px] text-slate-600 dark:text-neutral-300 space-y-1">
                     <p>🚨 *ALERTA SANITÁRIO — AGENTES DE SAÚDE*</p>
                     <p>📍 Microárea: *Jardim Esperança*</p>
