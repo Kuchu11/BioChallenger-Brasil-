@@ -110,6 +110,8 @@ export function NursePage() {
         symptomsList: selectedSymptomsList,
         symptoms: observations,
         riskLevel: calculateRiskLevel(),
+        coordinates: [-3.7435, -38.6560],
+        isAreaAffected: false
       });
 
       setWaitingList((prev) => prev.filter((p) => p.id !== selectedPatient.id));
@@ -144,7 +146,6 @@ export function NursePage() {
 
       <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         
-        {/* COLUNA ESQUERDA: FILA DE ACOLHIMENTO */}
         <div className="lg:col-span-1 bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-xl p-5 shadow-xs space-y-4 h-fit">
           <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-2">
             <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase flex items-center gap-2">
@@ -206,7 +207,6 @@ export function NursePage() {
           )}
         </div>
 
-        {/* COLUNA CENTRAL E DIREITA: QUADRO DE TRIAGEM ATIVA */}
         <div className="lg:col-span-2">
           {selectedPatient ? (
             <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-xs overflow-hidden">

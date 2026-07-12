@@ -9,6 +9,8 @@ export interface Patient {
   riskLevel: "blue" | "green" | "yellow" | "orange" | "red";
   arrivalInterv?: string;
   syndromeLabel?: string;
+  coordinates: [number, number];
+  isAreaAffected: boolean;
 }
 
 interface AttendanceContextType {
@@ -31,7 +33,9 @@ export function AttendanceProvider({ children }: { children: React.ReactNode }) 
       symptoms: "Paciente relata que voltou de viagem ao Nordeste há 5 dias. Febre iniciou ontem à noite, 38.9°C.",
       riskLevel: "red",
       arrivalInterv: "08:14",
-      syndromeLabel: "Síndrome Febril"
+      syndromeLabel: "Síndrome Febril",
+      coordinates: [-3.7410, -38.6480],
+      isAreaAffected: true
     },
     {
       name: "João Carlos Oliveira",
@@ -41,7 +45,9 @@ export function AttendanceProvider({ children }: { children: React.ReactNode }) 
       symptoms: "Sintomas respiratórios leves há 3 dias. Sem falta de ar.",
       riskLevel: "yellow",
       arrivalInterv: "08:31",
-      syndromeLabel: "Síndrome Respiratória"
+      syndromeLabel: "Síndrome Respiratória",
+      coordinates: [-3.7385, -38.6595],
+      isAreaAffected: true
     },
     {
       name: "Ana Paula Ferreira",
@@ -51,7 +57,9 @@ export function AttendanceProvider({ children }: { children: React.ReactNode }) 
       symptoms: "Paciente com episódios de diarreia desde a manhã de hoje.",
       riskLevel: "green",
       arrivalInterv: "08:47",
-      syndromeLabel: "Síndrome GI"
+      syndromeLabel: "Síndrome GI",
+      coordinates: [-3.7490, -38.6620],
+      isAreaAffected: false
     },
     {
       name: "Roberto Mendes Lima",
@@ -61,11 +69,13 @@ export function AttendanceProvider({ children }: { children: React.ReactNode }) 
       symptoms: "Quadro agudo com desconforto respiratório importante e náuseas.",
       riskLevel: "red",
       arrivalInterv: "09:02",
-      syndromeLabel: "Síndrome Mista"
+      syndromeLabel: "Síndrome Mista",
+      coordinates: [-3.7435, -38.6560],
+      isAreaAffected: true
     }
   ]);
 
-  const [currentPatient, setCurrentPatient] = useState<Patient | null>(queue[0]);
+  const [currentPatient, setCurrentPatient] = useState<Patient | null>(queue[2]);
 
   function addPatientToQueue(patient: Patient) {
     const now = new Date();
