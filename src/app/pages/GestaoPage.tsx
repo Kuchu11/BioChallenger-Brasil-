@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { RealGeographicMap } from "../components/RealGeographicMap";
 
 export function GestaoPage() {
   const navigate = useNavigate();
-  
-  // Estado para controlar a aba ativa do dashboard
   const [activeTab, setActiveTab] = useState<"territorial" | "notificados" | "campo">("territorial");
 
-  // Dados mockados para refletir exatamente os indicadores dos prints do Figma
   const metrics = {
     totalCases: 210,
     urgentAreas: 3,
@@ -18,7 +16,6 @@ export function GestaoPage() {
     <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 p-6 font-sans transition-colors duration-200">
       <div className="mx-auto max-w-7xl space-y-6">
         
-        {/* TOP BAR - CABEÇALHO DO DASHBOARD E INDICADORES FIXOS */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-200/60 dark:border-neutral-800 pb-5">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-[#64748b] dark:text-neutral-400">
@@ -36,7 +33,6 @@ export function GestaoPage() {
             </h1>
           </div>
 
-          {/* Cards de Métricas Rápidas na Direita */}
           <div className="flex items-center gap-4">
             <div className="bg-white dark:bg-neutral-900 border border-slate-200/80 dark:border-neutral-800 px-4 py-2 rounded-xl text-center shadow-xs">
               <p className="text-[20px] font-bold text-slate-800 dark:text-neutral-50">{metrics.totalCases}</p>
@@ -59,7 +55,6 @@ export function GestaoPage() {
           </div>
         </div>
 
-        {/* CONTROLE DE ABAS (SUB-MENU) */}
         <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-neutral-800 pb-px">
           <button
             onClick={() => setActiveTab("territorial")}
@@ -93,18 +88,14 @@ export function GestaoPage() {
           </button>
         </div>
 
-        {/* CONTEÚDO DINÂMICO BASEADO NA ABA ATIVA */}
-        
-        {/* ABA 1: PAINEL TERRITORIAL */}
         {activeTab === "territorial" && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
-            {/* Bloco Central do Mapa de Calor Quadriculado */}
             <div className="lg:col-span-3 bg-white dark:bg-neutral-900 border border-slate-200/80 dark:border-neutral-800 rounded-xl p-5 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-slate-800 dark:text-neutral-100">Mapa de Calor Territorial</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">16 microáreas • Município de Exemplo • Atualizado agora</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Análise e monitoramento automatizado de focos de contágio</p>
                 </div>
                 <div className="flex items-center gap-3 text-[11px] font-semibold">
                   <span className="flex items-center gap-1 text-emerald-600"><span className="h-2 w-2 rounded-full bg-emerald-500/20 border border-emerald-500"></span> Estável</span>
@@ -113,49 +104,13 @@ export function GestaoPage() {
                 </div>
               </div>
 
-              {/* Grid Simulado do Mapa do Figma */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="border border-emerald-100 bg-emerald-50/20 dark:bg-emerald-950/10 p-4 rounded-lg h-36 flex flex-col justify-between">
-                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Zona Norte Industrial</span>
-                  <div className="flex items-center justify-between text-[10px] font-bold"><span className="text-emerald-700">3</span><span className="bg-emerald-100 text-emerald-800 px-1 rounded uppercase">Estável</span></div>
-                </div>
-                <div className="border border-amber-100 bg-amber-50/20 dark:bg-amber-950/10 p-4 rounded-lg h-36 flex flex-col justify-between">
-                  <span className="text-xs font-bold text-amber-800 dark:text-amber-400">Vila Oliveira</span>
-                  <div className="flex items-center justify-between text-[10px] font-bold"><span className="text-amber-700">12</span><span className="bg-amber-100 text-amber-800 px-1 rounded uppercase">Alerta</span></div>
-                </div>
-                <div className="border border-emerald-100 bg-emerald-50/20 dark:bg-emerald-950/10 p-4 rounded-lg h-36 flex flex-col justify-between">
-                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Setor Novo</span>
-                  <div className="flex items-center justify-between text-[10px] font-bold"><span className="text-emerald-700">5</span><span className="bg-emerald-100 text-emerald-800 px-1 rounded uppercase">Estável</span></div>
-                </div>
-                <div className="border border-emerald-100 bg-emerald-50/20 dark:bg-emerald-950/10 p-4 rounded-lg h-36 flex flex-col justify-between">
-                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Jardins do Planalto</span>
-                  <div className="flex items-center justify-between text-[10px] font-bold"><span className="text-emerald-700">2</span><span className="bg-emerald-100 text-emerald-800 px-1 rounded uppercase">Estável</span></div>
-                </div>
-
-                {/* Linha Crítica de Surtos */}
-                <div className="border border-red-200 bg-red-50/40 dark:bg-red-950/10 p-4 rounded-lg h-36 flex flex-col justify-between relative ring-2 ring-red-500/20">
-                  <span className="text-xs font-bold text-red-700 dark:text-red-400">Jardim Esperança</span>
-                  <div className="flex items-center justify-between text-[10px] font-bold"><span className="text-red-700">28</span><span className="bg-red-100 text-red-800 px-1 rounded uppercase">Urgente</span></div>
-                </div>
-                <div className="border border-red-200 bg-red-50/40 dark:bg-red-950/10 p-4 rounded-lg h-36 flex flex-col justify-between relative ring-2 ring-red-500/20">
-                  <span className="text-xs font-bold text-red-700 dark:text-red-400">Centro Histórico</span>
-                  <div className="flex items-center justify-between text-[10px] font-bold"><span className="text-red-700">41</span><span className="bg-red-100 text-red-800 px-1 rounded uppercase">Urgente</span></div>
-                </div>
-                <div className="border border-red-200 bg-red-50/40 dark:bg-red-950/10 p-4 rounded-lg h-36 flex flex-col justify-between relative ring-2 ring-red-500/20">
-                  <span className="text-xs font-bold text-red-700 dark:text-red-400">Bairro Sudoeste / São José</span>
-                  <div className="flex items-center justify-between text-[10px] font-bold"><span className="text-red-700">33</span><span className="bg-red-100 text-red-800 px-1 rounded uppercase">Urgente</span></div>
-                </div>
-                <div className="border border-amber-100 bg-amber-50/20 dark:bg-amber-950/10 p-4 rounded-lg h-36 flex flex-col justify-between">
-                  <span className="text-xs font-bold text-amber-800 dark:text-amber-400">Vila Operária</span>
-                  <div className="flex items-center justify-between text-[10px] font-bold"><span className="text-amber-700">18</span><span className="bg-amber-100 text-amber-800 px-1 rounded uppercase">Alerta</span></div>
-                </div>
+              <div className="w-full h-[450px] mt-2">
+                <RealGeographicMap />
               </div>
             </div>
 
-            {/* Coluna Lateral Direita: Status dos Postos e Tendências */}
             <div className="space-y-6">
               
-              {/* Box dos Postos de Saúde */}
               <div className="bg-white dark:bg-neutral-900 border border-slate-200/80 dark:border-neutral-800 rounded-xl p-4 shadow-xs space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-neutral-800 pb-2">
                   <h4 className="text-xs font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider">Postos de Saúde</h4>
@@ -186,7 +141,6 @@ export function GestaoPage() {
                 </div>
               </div>
 
-              {/* Box de Tendências Sindrômicas */}
               <div className="bg-white dark:bg-neutral-900 border border-slate-200/80 dark:border-neutral-800 rounded-xl p-4 shadow-xs space-y-3">
                 <h4 className="text-xs font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider border-b border-slate-100 dark:border-neutral-800 pb-2">Tendências Sindrômicas</h4>
                 <div className="space-y-2.5 pt-1">
@@ -209,11 +163,8 @@ export function GestaoPage() {
           </div>
         )}
 
-        {/* ABA 2: CASOS NOTIFICADOS (TABELA LGPD) */}
         {activeTab === "notificados" && (
           <div className="bg-white dark:bg-neutral-900 border border-slate-200/80 dark:border-neutral-800 rounded-xl shadow-xs overflow-hidden">
-            
-            {/* Aviso da LGPD */}
             <div className="m-5 flex gap-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/20 p-4 border border-amber-100 dark:border-amber-900/30">
               <span className="text-amber-600 shrink-0">🛡</span>
               <p className="text-xs font-medium text-amber-800 dark:text-amber-400 leading-relaxed">
@@ -221,7 +172,6 @@ export function GestaoPage() {
               </p>
             </div>
 
-            {/* Barra de Busca Sintética */}
             <div className="px-5 pb-4 flex items-center justify-between border-b border-slate-100 dark:border-neutral-800">
               <input
                 type="text"
@@ -231,7 +181,6 @@ export function GestaoPage() {
               <span className="text-xs text-slate-400 font-medium">8 registros encontrados</span>
             </div>
 
-            {/* Tabela Estruturada */}
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
@@ -275,7 +224,6 @@ export function GestaoPage() {
           </div>
         )}
 
-        {/* ABA 3: AÇÕES DE CAMPO (DISPARO WHATSAPP) */}
         {activeTab === "campo" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -285,10 +233,8 @@ export function GestaoPage() {
               </div>
             </div>
 
-            {/* Cards de Alerta de Campo */}
             <div className="space-y-4">
               
-              {/* Card 1: Jardim Esperança */}
               <div className="bg-white dark:bg-neutral-900 border border-red-100 dark:border-neutral-800 rounded-xl p-5 shadow-xs flex flex-col md:flex-row justify-between gap-4 items-start">
                 <div className="space-y-3 w-full md:max-w-xl">
                   <div className="flex items-center gap-2">
@@ -298,7 +244,6 @@ export function GestaoPage() {
                   </div>
                   <p className="text-xs text-slate-400">28 notificações recentes • Síndrome: <span className="font-bold text-red-600">Respiratória</span></p>
                   
-                  {/* Bloco Copiar Texto */}
                   <div className="bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg border border-slate-100 dark:border-neutral-700 font-mono text-[11px] text-slate-600 dark:text-neutral-300 space-y-1">
                     <p>🚨 *ALERTA SANITÁRIO — AGENTES DE SAÚDE*</p>
                     <p>📍 Microárea: *Jardim Esperança*</p>
@@ -314,7 +259,6 @@ export function GestaoPage() {
                 </button>
               </div>
 
-              {/* Card 2: Centro Histórico */}
               <div className="bg-white dark:bg-neutral-900 border border-red-100 dark:border-neutral-800 rounded-xl p-5 shadow-xs flex flex-col md:flex-row justify-between gap-4 items-start">
                 <div className="space-y-3 w-full md:max-w-xl">
                   <div className="flex items-center gap-2">

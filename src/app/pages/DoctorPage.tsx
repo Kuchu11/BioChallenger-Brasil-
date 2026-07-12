@@ -1,37 +1,29 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAttendance } from "../context/AttendanceContext";
+import { RealGeographicMap } from "../components/RealGeographicMap";
 
 export function DoctorPage() {
-  const { queue, currentPatient, callNextPatient } = useAttendance();
+  const { queue, currentPatient } = useAttendance();
   const navigate = useNavigate();
 
-  // Estados dos campos do formulário do médico
   const [prescription, setPrescription] = useState("");
-
-  // Estado do Modal de Notificação Epidemiológica
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [doctorPassword, setDoctorPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Lógica dinâmica para definir a síndrome do paciente atual baseado na triagem
   const getSyndromeLabel = () => {
-    if (!currentPatient) return "";
-    
-    // Se veio da triagem com sintomas mapeados
+    if (!currentPatient) return "Síndrome Febril";
     const list = currentPatient.symptomsList || [];
     const hasFebril = list.some(s => ["Febre Alta", "Dor de Cabeça", "Dor no Corpo"].includes(s));
     const hasResp = list.some(s => ["Tosse", "Coriza", "Falta de Ar"].includes(s));
     const hasGastro = list.some(s => ["Diarreia", "Vômito", "Dor Abdominal"].includes(s));
 
-    if ((hasFebril && hasResp) || (hasFebril && hasGastro) || (hasResp && hasGastro)) {
-      return "Síndrome Mista";
-    }
+    if ((hasFebril && hasResp) || (hasFebril && hasGastro) || (hasResp && hasGastro)) return "Síndrome Mista";
     if (hasFebril) return "Síndrome Febril";
     if (hasResp) return "Síndrome Respiratória";
     if (hasGastro) return "Síndrome Gastrointestinal";
-    
-    return "Síndrome Febril"; // Fallback padrão do figma
+    return "Síndrome Febril";
   };
 
   const syndromeColors = {
@@ -64,10 +56,8 @@ export function DoctorPage() {
     <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 p-6 font-sans transition-colors duration-200">
       <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-3">
         
-        {/* COLUNA ESQUERDA E CENTRAL: FORMULÁRIO MÉDICO E DADOS DO PACIENTE */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Box do Paciente Atendido */}
           <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-xs">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-neutral-100 dark:border-neutral-800 pb-4 mb-4">
               <div>
@@ -118,7 +108,6 @@ export function DoctorPage() {
             </div>
           </div>
 
-          {/* Formulário de Conduta Médica */}
           <form onSubmit={handleFinishAppointment} className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-xs space-y-5">
             <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase border-b border-neutral-100 dark:border-neutral-800 pb-2">Conduta Médica / Evolução e Prescrição</h3>
             
@@ -145,10 +134,8 @@ export function DoctorPage() {
 
         </div>
 
-        {/* COLUNA DIREITA: INTELIGÊNCIA TERRITORIAL (MAPA) E FILA */}
         <div className="space-y-6">
           
-          {/* Box do Mapa Territorial de Surtos */}
           <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-2">
               <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase flex items-center gap-1.5">
@@ -156,35 +143,12 @@ export function DoctorPage() {
               </h3>
             </div>
 
-            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">Mapa da Microárea</div>
+            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">Mapa da Microárea (Caucaia)</div>
 
-            {/* Simulação do gráfico/mapa quadriculado do seu Figma */}
-            <div className="relative h-44 rounded-lg bg-slate-50 dark:bg-neutral-800 border border-slate-200/60 dark:border-neutral-700 overflow-hidden p-2 grid grid-cols-3 grid-rows-3 gap-1">
-              <div className="border border-red-200 bg-red-100/50 dark:border-red-950/40 rounded flex items-center justify-center relative">
-                <span className="absolute h-3 w-3 rounded-full bg-red-500 border border-white animate-pulse"></span>
-              </div>
-              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
-              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
-              <div className="border border-red-100 bg-red-50/30 dark:border-neutral-800 rounded"></div>
-              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
-              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
-              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
-              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
-              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
+            <div className="w-full h-56 mt-2 rounded-lg overflow-hidden">
+              <RealGeographicMap />
             </div>
             
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-neutral-200">
-                <span className="h-2 w-2 rounded-full bg-red-500"></span> Surto ativo nesta microárea
-              </div>
-              <div className="text-[11px] text-slate-400 dark:text-neutral-300 bg-slate-50 dark:bg-neutral-800 px-2 py-1.5 rounded border border-slate-100 dark:border-neutral-700">
-                Rua das Acácias, 314 — Jd. América
-              </div>
-              <div className="w-full text-center text-[10px] bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400 font-bold uppercase py-1 rounded border border-red-200/40 tracking-wider">
-                ● ALTO RISCO — surto confirmado na microárea
-              </div>
-            </div>
-
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
@@ -194,7 +158,6 @@ export function DoctorPage() {
             </button>
           </div>
 
-          {/* Fila de Consultas Lateral */}
           <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 shadow-xs space-y-3">
             <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-2">
               <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase">
@@ -218,12 +181,10 @@ export function DoctorPage() {
 
       </div>
 
-      {/* MODAL DE CONFIRMAÇÃO DE NOTIFICAÇÃO COMPULSÓRIA */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-5">
             
-            {/* Header do Modal */}
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600">
@@ -244,7 +205,6 @@ export function DoctorPage() {
               </button>
             </div>
 
-            {/* Caixa de Alerta Vermelha */}
             <div className="flex gap-3 rounded-xl bg-red-50/80 p-4 border border-red-100">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-red-600 shrink-0 mt-0.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
@@ -254,7 +214,6 @@ export function DoctorPage() {
               </p>
             </div>
 
-            {/* Caixa da Microárea Notificada */}
             <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3.5 border border-slate-100">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-blue-600">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -266,14 +225,11 @@ export function DoctorPage() {
               </div>
             </div>
 
-            {/* Campo da Senha */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-500 tracking-wider uppercase">Senha do Médico Responsável</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                  </svg>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                  🔒
                 </span>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -293,7 +249,6 @@ export function DoctorPage() {
               </div>
             </div>
 
-            {/* Botões de Ação */}
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 type="button"
