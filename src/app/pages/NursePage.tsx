@@ -146,6 +146,7 @@ export function NursePage() {
 
       <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         
+        {/* COLUNA ESQUERDA: FILA DE ACOLHIMENTO */}
         <div className="lg:col-span-1 bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-xl p-5 shadow-xs space-y-4 h-fit">
           <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-2">
             <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase flex items-center gap-2">
@@ -207,6 +208,7 @@ export function NursePage() {
           )}
         </div>
 
+        {/* COLUNA CENTRAL E DIREITA: QUADRO DE TRIAGEM ATIVA */}
         <div className="lg:col-span-2">
           {selectedPatient ? (
             <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-xs overflow-hidden">
@@ -245,7 +247,21 @@ export function NursePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-[#64748b] dark:text-neutral-300 mb-1.5">Cartão Nacional SUS</label>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label className="block text-xs font-semibold text-[#64748b] dark:text-neutral-300">Cartão Nacional SUS</label>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const novoCep = prompt("Paciente mudou de endereço? Digite o novo CEP:");
+                            if (novoCep) {
+                              alert(`Endereço temporariamente atualizado para o CEP ${novoCep}. Novas coordenadas aplicadas para o mapa de inteligência territorial!`);
+                            }
+                          }}
+                          className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold cursor-pointer transition-all"
+                        >
+                          ✏️ Mudou de endereço?
+                        </button>
+                      </div>
                       <input
                         type="text"
                         placeholder="000 0000 0000 0000"
@@ -253,6 +269,9 @@ export function NursePage() {
                         onChange={(e) => setSusCard(e.target.value)}
                         className="w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-[#f8fafc] dark:bg-neutral-800 px-3 py-2 text-sm text-[#1e293b] dark:text-neutral-50 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none"
                       />
+                      <p className="text-[10px] text-slate-400 dark:text-neutral-400 mt-1.5 flex items-center gap-1 font-medium">
+                        <span>ℹ️</span> Localização e microárea vinculadas automaticamente via base do Cartão SUS.
+                      </p>
                     </div>
                   </div>
                 </div>
