@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
 import { RealGeographicMap } from "../components/RealGeographicMap";
 import { Navbar } from "../components/Navbar";
 
@@ -36,7 +35,6 @@ interface FieldAction {
 }
 
 export function GestaoPage() {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"territorial" | "notificados" | "campo">("territorial");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -228,12 +226,6 @@ export function GestaoPage() {
               <p className="text-[20px] font-bold text-amber-500 dark:text-amber-400">{metrics.alertAreas}</p>
               <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Em Alerta</p>
             </div>
-            <button 
-              onClick={() => navigate("/triagem")}
-              className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-xs shadow-md hover:bg-blue-700 cursor-pointer"
-            >
-              RA
-            </button>
           </div>
         </div>
 
