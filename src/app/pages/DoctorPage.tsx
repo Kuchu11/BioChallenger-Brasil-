@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 
 interface ConsultationData {
   diagnosis: string;
@@ -15,15 +16,12 @@ export function DoctorPage() {
     forwarding: "",
   });
 
+  const navigate = useNavigate();
+
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     alert("Atendimento médico finalizado e gravado no prontuário!");
-    setForm({
-      diagnosis: "",
-      prescription: "",
-      sickLeaveDays: "",
-      forwarding: "",
-    });
+    navigate("/gestao");
   }
 
   return (
