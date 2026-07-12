@@ -14,6 +14,13 @@ interface DetailedPatient {
   details: string;
 }
 
+interface UbsLocation {
+  name: string;
+  staff: string;
+  status: "online" | "offline";
+  coordinates: [number, number];
+}
+
 export function GestaoPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"territorial" | "notificados" | "campo">("territorial");
@@ -24,11 +31,35 @@ export function GestaoPage() {
   const [selectedCase, setSelectedCase] = useState<DetailedPatient | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const [mapFocus, setMapFocus] = useState<[number, number] | undefined>(undefined);
+  const [ubsName, setUbsName] = useState<string>("");
+
   const metrics = {
     totalCases: 210,
     urgentAreas: 3,
     alertAreas: 5
   };
+
+  const ubsList: UbsLocation[] = [
+    {
+      name: "UBS Centro",
+      staff: "2 méd • 4 enf",
+      status: "online",
+      coordinates: [-3.7345, -38.6520] as [number, number]
+    },
+    {
+      name: "UBS Jardim Esperança",
+      staff: "1 méd • 3 enf",
+      status: "online",
+      coordinates: [-3.7385, -38.6575] as [number, number]
+    },
+    {
+      name: "UBS São José",
+      staff: "Sistema Offline",
+      status: "offline",
+      coordinates: [-3.7355, -38.6545] as [number, number]
+    }
+  ];
 
   const casesList: DetailedPatient[] = [
     {
@@ -169,7 +200,7 @@ export function GestaoPage() {
                 </div>
               </div>
               <div className="w-full h-[450px] mt-2">
-                <RealGeographicMap />
+                <RealGeographicMap customCenter={mapFocus} popupText={ubsName} />
               </div>
             </div>
 
@@ -180,27 +211,22 @@ export function GestaoPage() {
                   <span className="text-[10px] text-slate-400 font-bold">5/6 online</span>
                 </div>
                 <div className="space-y-2 text-xs">
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-neutral-800/50">
-                    <div>
-                      <p className="font-bold text-slate-700 dark:text-neutral-200">UBS Centro</p>
-                      <p className="text-[10px] text-slate-400">2 méd • 4 enf</p>
+                  {ubsList.map((posto, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => {
+                        setMapFocus([...posto.coordinates]);
+                        setUbsName(posto.name);
+                      }}
+                      className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-neutral-800/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-neutral-800 transition-all select-none"
+                    >
+                      <div>
+                        <p className="font-bold text-slate-700 dark:text-neutral-200">{posto.name}</p>
+                        <p className={`text-[10px] ${posto.status === "offline" ? "text-red-400" : "text-slate-400"}`}>{posto.staff}</p>
+                      </div>
+                      <span className={posto.status === "offline" ? "text-slate-300" : "text-emerald-500"}>●</span>
                     </div>
-                    <span className="text-emerald-500">●</span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-neutral-800/50">
-                    <div>
-                      <p className="font-bold text-slate-700 dark:text-neutral-200">UBS Jardim Esperança</p>
-                      <p className="text-[10px] text-slate-400">1 méd • 3 enf</p>
-                    </div>
-                    <span className="text-emerald-500">●</span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-neutral-800/50">
-                    <div>
-                      <p className="font-bold text-slate-700 dark:text-neutral-200">UBS São José</p>
-                      <p className="text-[10px] text-red-400">Sistema Offline</p>
-                    </div>
-                    <span className="text-slate-300">●</span>
-                  </div>
+                  ))}
                 </div>
               </div>
 
@@ -324,7 +350,7 @@ export function GestaoPage() {
                     <h4 className="text-sm font-bold text-slate-800 dark:text-neutral-50">Centro Histórico</h4>
                     <span className="bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded text-[10px] uppercase">Urgente</span>
                   </div>
-                  <p className="text-xs text-slate-400">41 notificações recentes • Síndrome: <span className="font-bold text-amber-600">Febril</span></p>
+                  <p className="text-xs text-slate-400">41 notifications recentes • Síndrome: <span className="font-bold text-amber-600">Febril</span></p>
                   <div className="bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg border border-slate-100 dark:border-neutral-700 font-mono text-[11px] text-slate-600 dark:text-neutral-300 space-y-1">
                     <p>🚨 *ALERTA SANITÁRIO — AGENTES DE SAÚDE*</p>
                     <p>📍 Microárea: *Centro Histórico*</p>
