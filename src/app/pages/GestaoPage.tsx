@@ -2,14 +2,86 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { RealGeographicMap } from "../components/RealGeographicMap";
 
+interface DetailedPatient {
+  id: string;
+  name: string;
+  cpf: string;
+  susCard: string;
+  syndrome: string;
+  unit: string;
+  date: string;
+  details: string;
+}
+
 export function GestaoPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"territorial" | "notificados" | "campo">("territorial");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [selectedCase, setSelectedCase] = useState<DetailedPatient | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const metrics = {
     totalCases: 210,
     urgentAreas: 3,
     alertAreas: 5
+  };
+
+  const casesList: DetailedPatient[] = [
+    {
+      id: "ALT-2026-0891",
+      name: "Maria Aparecida Santos",
+      cpf: "342.891.020-15",
+      susCard: "7081 2034 9871",
+      syndrome: "IRA / Respiratória",
+      unit: "UBS Centro",
+      date: "03/07/2026",
+      details: "Paciente apresentou tosse produtiva, coriza e relato de febre há 3 dias. Microárea sob monitoramento de surto."
+    },
+    {
+      id: "ALT-2026-0892",
+      name: "Carlos Eduardo Oliveira",
+      cpf: "092.415.884-02",
+      susCard: "7043 8899 1122",
+      syndrome: "Febril / Dengue-like",
+      unit: "UBS Jardim Esperança",
+      date: "03/07/2026",
+      details: "Febre alta súbita, cefaleia e dores retro-orbitárias. Busca ativa de criadouros iniciada no quarteirão."
+    },
+    {
+      id: "ALT-2026-0893",
+      name: "João Carlos Ferreira",
+      cpf: "051.772.397-88",
+      susCard: "7050 4433 2211",
+      syndrome: "Gastrointestinal",
+      unit: "UBS Vila Nova",
+      date: "02/07/2026",
+      details: "Quadro de diarreia aguda e desidratação leve. Coleta de amostra de água realizada na residência."
+    }
+  ];
+
+  const handleOpenLock = (item: DetailedPatient) => {
+    setSelectedCase(item);
+    setIsModalOpen(true);
+    setIsAuthenticated(false);
+    setPassword("");
+  };
+
+  const handleVerifyPassword = () => {
+    if (!password) {
+      alert("Por favor, insira sua credencial de segurança.");
+      return;
+    }
+    setIsAuthenticated(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedCase(null);
+    setIsAuthenticated(false);
+    setPassword("");
   };
 
   return (
@@ -90,7 +162,6 @@ export function GestaoPage() {
 
         {activeTab === "territorial" && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
             <div className="lg:col-span-3 bg-white dark:bg-neutral-900 border border-slate-200/80 dark:border-neutral-800 rounded-xl p-5 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -103,14 +174,12 @@ export function GestaoPage() {
                   <span className="flex items-center gap-1 text-red-600"><span className="h-2 w-2 rounded-full bg-red-500/20 border border-red-500"></span> Urgente</span>
                 </div>
               </div>
-
               <div className="w-full h-[450px] mt-2">
                 <RealGeographicMap />
               </div>
             </div>
 
             <div className="space-y-6">
-              
               <div className="bg-white dark:bg-neutral-900 border border-slate-200/80 dark:border-neutral-800 rounded-xl p-4 shadow-xs space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-neutral-800 pb-2">
                   <h4 className="text-xs font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider">Postos de Saúde</h4>
@@ -158,7 +227,6 @@ export function GestaoPage() {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         )}
@@ -178,7 +246,7 @@ export function GestaoPage() {
                 placeholder="Buscar por ID, síndrome, unidade..."
                 className="rounded-lg border border-neutral-200 dark:border-neutral-700 bg-[#f8fafc] dark:bg-neutral-800 px-3.5 py-2 text-xs w-72 focus:outline-none"
               />
-              <span className="text-xs text-slate-400 font-medium">8 registros encontrados</span>
+              <span className="text-xs text-slate-400 font-medium">{casesList.length} registros encontrados</span>
             </div>
 
             <div className="overflow-x-auto">
@@ -194,30 +262,27 @@ export function GestaoPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-neutral-800 font-medium text-slate-700 dark:text-neutral-300">
-                  <tr className="hover:bg-slate-50/50">
-                    <td className="p-4 text-blue-600 dark:text-blue-400 font-bold">ALT-2026-0891</td>
-                    <td className="p-4">Ma******</td>
-                    <td className="p-4">03*.***.**0-**</td>
-                    <td className="p-4"><span className="bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full border border-blue-100 text-[10px] font-bold">IRA / Respiratória</span></td>
-                    <td className="p-4">UBS Centro</td>
-                    <td className="p-4"><button onClick={() => alert("Auditando acesso ao prontuário...")} className="border border-slate-200 px-2.5 py-1 rounded-md text-[11px] hover:bg-slate-50 cursor-pointer">👁 Visualizar</button></td>
-                  </tr>
-                  <tr className="hover:bg-slate-50/50">
-                    <td className="p-4 text-blue-600 dark:text-blue-400 font-bold">ALT-2026-0892</td>
-                    <td className="p-4">Ca******</td>
-                    <td className="p-4">09*.***.**4-**</td>
-                    <td className="p-4"><span className="bg-orange-50 text-orange-700 px-2.5 py-0.5 rounded-full border border-orange-100 text-[10px] font-bold">Febril / Dengue-like</span></td>
-                    <td className="p-4">UBS Jardim Esperança</td>
-                    <td className="p-4"><button onClick={() => alert("Auditando acesso ao prontuário...")} className="border border-slate-200 px-2.5 py-1 rounded-md text-[11px] hover:bg-slate-50 cursor-pointer">👁 Visualizar</button></td>
-                  </tr>
-                  <tr className="hover:bg-slate-50/50">
-                    <td className="p-4 text-blue-600 dark:text-blue-400 font-bold">ALT-2026-0893</td>
-                    <td className="p-4">Jo******</td>
-                    <td className="p-4">05*.***.**7-**</td>
-                    <td className="p-4"><span className="bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-100 text-[10px] font-bold">Gastrointestinal</span></td>
-                    <td className="p-4">UBS Vila Nova</td>
-                    <td className="p-4"><button onClick={() => alert("Auditando acesso ao prontuário...")} className="border border-slate-200 px-2.5 py-1 rounded-md text-[11px] hover:bg-slate-50 cursor-pointer">👁 Visualizar</button></td>
-                  </tr>
+                  {casesList.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-50/50">
+                      <td className="p-4 text-blue-600 dark:text-blue-400 font-bold">{item.id}</td>
+                      <td className="p-4">{item.name.substring(0, 2)}******</td>
+                      <td className="p-4">{item.cpf.substring(0, 3)}*.***.**4-**</td>
+                      <td className="p-4">
+                        <span className="bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-100 dark:border-blue-900/30 text-[10px] font-bold">
+                          {item.syndrome}
+                        </span>
+                      </td>
+                      <td className="p-4">{item.unit}</td>
+                      <td className="p-4">
+                        <button 
+                          onClick={() => handleOpenLock(item)} 
+                          className="border border-slate-200 dark:border-neutral-700 px-2.5 py-1 rounded-md text-[11px] hover:bg-slate-50 dark:hover:bg-neutral-800 cursor-pointer flex items-center gap-1"
+                        >
+                          👁 Visualizar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -234,7 +299,6 @@ export function GestaoPage() {
             </div>
 
             <div className="space-y-4">
-              
               <div className="bg-white dark:bg-neutral-900 border border-red-100 dark:border-neutral-800 rounded-xl p-5 shadow-xs flex flex-col md:flex-row justify-between gap-4 items-start">
                 <div className="space-y-3 w-full md:max-w-xl">
                   <div className="flex items-center gap-2">
@@ -243,7 +307,6 @@ export function GestaoPage() {
                     <span className="bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded text-[10px] uppercase">Urgente</span>
                   </div>
                   <p className="text-xs text-slate-400">28 notificações recentes • Síndrome: <span className="font-bold text-red-600">Respiratória</span></p>
-                  
                   <div className="bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg border border-slate-100 dark:border-neutral-700 font-mono text-[11px] text-slate-600 dark:text-neutral-300 space-y-1">
                     <p>🚨 *ALERTA SANITÁRIO — AGENTES DE SAÚDE*</p>
                     <p>📍 Microárea: *Jardim Esperança*</p>
@@ -267,7 +330,6 @@ export function GestaoPage() {
                     <span className="bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded text-[10px] uppercase">Urgente</span>
                   </div>
                   <p className="text-xs text-slate-400">41 notificações recentes • Síndrome: <span className="font-bold text-amber-600">Febril</span></p>
-                  
                   <div className="bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg border border-slate-100 dark:border-neutral-700 font-mono text-[11px] text-slate-600 dark:text-neutral-300 space-y-1">
                     <p>🚨 *ALERTA SANITÁRIO — AGENTES DE SAÚDE*</p>
                     <p>📍 Microárea: *Centro Histórico*</p>
@@ -282,12 +344,107 @@ export function GestaoPage() {
                   💬 Gerar Alerta WhatsApp
                 </button>
               </div>
-
             </div>
           </div>
         )}
 
       </div>
+
+      {isModalOpen && selectedCase && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl space-y-5">
+            
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                  🛡️
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Auditoria e Acesso Prontuário</h3>
+                  <p className="text-xs text-slate-500 font-medium">Registro do Alerta: {selectedCase.id}</p>
+                </div>
+              </div>
+              <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
+            </div>
+
+            {!isAuthenticated ? (
+              <>
+                <div className="flex gap-3 rounded-xl bg-amber-50/80 p-4 border border-amber-100">
+                  <p className="text-xs text-amber-800 font-medium leading-relaxed">
+                    ⚠️ <b>Aviso de Privacidade:</b> Esta ação revelará informações nominais do cidadão. Para prosseguir e registrar seu acesso no log de auditoria da LGPD, insira sua senha de gestor.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-500 tracking-wider uppercase">Sua Senha de Gestor</label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔒</span>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full rounded-xl border border-neutral-200 bg-[#f8fafc] py-3 pl-10 pr-10 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {showPassword ? "🙈" : "👁️"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <button onClick={handleCloseModal} className="w-full rounded-xl border border-slate-200 py-3 font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">
+                    Cancelar
+                  </button>
+                  <button onClick={handleVerifyPassword} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 py-3 font-semibold text-sm text-white shadow-xs transition-colors cursor-pointer">
+                    Autenticar e Desbloquear
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div className="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <div>
+                    <p className="font-bold text-slate-400 uppercase">Nome Completo</p>
+                    <p className="text-sm font-bold text-slate-800 mt-0.5">{selectedCase.name}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-400 uppercase">Data da Entrada</p>
+                    <p className="text-sm font-bold text-slate-800 mt-0.5">{selectedCase.date}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-400 uppercase">CPF Unmasked</p>
+                    <p className="text-sm font-bold text-slate-800 mt-0.5">{selectedCase.cpf}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-400 uppercase">Cartão SUS</p>
+                    <p className="text-sm font-bold text-slate-800 mt-0.5">{selectedCase.susCard}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Histórico e Evolução Clínica Mapeada</p>
+                  <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100 leading-relaxed font-medium">
+                    {selectedCase.details}
+                  </p>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button onClick={handleCloseModal} className="rounded-xl bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 font-semibold text-xs uppercase tracking-wider cursor-pointer">
+                    Fechar Prontuário
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
