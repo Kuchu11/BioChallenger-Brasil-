@@ -4,7 +4,7 @@ import { useAttendance } from "../context/AttendanceContext";
 import { RealGeographicMap } from "../components/RealGeographicMap";
 
 export function DoctorPage() {
-  const { queue, currentPatient } = useAttendance();
+  const { queue, currentPatient, setCurrentPatient, removePatientFromQueue } = useAttendance();
   const navigate = useNavigate();
 
   const [prescription, setPrescription] = useState("");
@@ -12,32 +12,29 @@ export function DoctorPage() {
   const [doctorPassword, setDoctorPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const getSyndromeLabel = () => {
-    if (!currentPatient) return "Síndrome Febril";
-    const list = currentPatient.symptomsList || [];
-    const hasFebril = list.some(s => ["Febre Alta", "Dor de Cabeça", "Dor no Corpo"].includes(s));
-    const hasResp = list.some(s => ["Tosse", "Coriza", "Falta de Ar"].includes(s));
-    const hasGastro = list.some(s => ["Diarreia", "Vômito", "Dor Abdominal"].includes(s));
-
-    if ((hasFebril && hasResp) || (hasFebril && hasGastro) || (hasResp && hasGastro)) return "Síndrome Mista";
-    if (hasFebril) return "Síndrome Febril";
-    if (hasResp) return "Síndrome Respiratória";
-    if (hasGastro) return "Síndrome Gastrointestinal";
-    return "Síndrome Febril";
+  const riskColors: Record<string, string> = {
+    red: "bg-red-500",
+    orange: "bg-orange-500",
+    yellow: "bg-amber-500",
+    green: "bg-emerald-500",
+    blue: "bg-blue-500",
   };
 
-  const syndromeColors = {
+  const labelColors: Record<string, string> = {
     "Síndrome Febril": "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-900/30",
     "Síndrome Respiratória": "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/30",
-    "Síndrome Gastrointestinal": "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/30",
+    "Síndrome GI": "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/30",
     "Síndrome Mista": "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/30",
   };
 
   const handleFinishAppointment = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Atendimento de ${currentPatient?.name || "Maria Aparecida Santos"} finalizado com sucesso!`);
-    setPrescription("");
-    navigate("/gestao");
+    if (currentPatient) {
+      alert(`Atendimento de ${currentPatient.name} finalizado com sucesso!`);
+      removePatientFromQueue(currentPatient.name);
+      setPrescription("");
+      navigate("/gestao");
+    }
   };
 
   const handleConfirmNotification = () => {
@@ -50,7 +47,7 @@ export function DoctorPage() {
     setDoctorPassword("");
   };
 
-  const currentSyndrome = getSyndromeLabel() as keyof typeof syndromeColors;
+  const activeSyndrome = currentPatient?.syndromeLabel || "Síndrome Febril";
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 p-6 font-sans transition-colors duration-200">
@@ -63,69 +60,69 @@ export function DoctorPage() {
               <div>
                 <p className="text-xs font-bold text-[#64748b] dark:text-neutral-400 tracking-wider uppercase">Paciente em Atendimento</p>
                 <h2 className="text-xl font-bold text-[#1e293b] dark:text-neutral-50 mt-0.5">
-                  {currentPatient ? currentPatient.name : "Maria Aparecida Santos"}
+                  {currentPatient ? currentPatient.name : "Nenhum paciente selecionado"}
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">42 anos • CPF 342.891.020-15</p>
+                {currentPatient && (
+                  <p className="text-xs text-slate-400 mt-1">CPF {currentPatient.cpf}</p>
+                )}
               </div>
-              <span className={`rounded-full px-3 py-1 text-xs font-bold border ${syndromeColors[currentSyndrome] || syndromeColors["Síndrome Febril"]}`}>
-                ⚡ {currentSyndrome || "Síndrome Febril"}
-              </span>
+              {currentPatient && (
+                <span className={`rounded-full px-3 py-1 text-xs font-bold border ${labelColors[activeSyndrome] || labelColors["Síndrome Febril"]}`}>
+                  ⚡ {activeSyndrome}
+                </span>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-xs font-semibold text-slate-400">CPF</p>
-                <p className="font-medium text-slate-700 dark:text-slate-300 mt-0.5">{currentPatient?.cpf || "342.891.020-15"}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-400">Cartão SUS</p>
-                <p className="font-medium text-slate-700 dark:text-slate-300 mt-0.5">{currentPatient?.susCard || "7081 2034 9871"}</p>
-              </div>
-              <div className="sm:col-span-2">
-                <p className="text-xs font-semibold text-slate-400 mb-1.5">Sintomas Identificados na Triagem</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {currentPatient?.symptomsList && currentPatient.symptomsList.length > 0 ? (
-                    currentPatient.symptomsList.map((symptom, idx) => (
+            {currentPatient ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-xs font-semibold text-slate-400">CPF</p>
+                  <p className="font-medium text-slate-700 dark:text-slate-300 mt-0.5">{currentPatient.cpf}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-400">Cartão SUS</p>
+                  <p className="font-medium text-slate-700 dark:text-slate-300 mt-0.5">{currentPatient.susCard}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-xs font-semibold text-slate-400 mb-1.5">Sintomas Identificados na Triagem</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {currentPatient.symptomsList?.map((symptom, idx) => (
                       <span key={idx} className="rounded-md bg-slate-100 dark:bg-neutral-800 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-neutral-300 border border-slate-200/40 dark:border-neutral-700/50">
                         {symptom}
                       </span>
-                    ))
-                  ) : (
-                    <>
-                      <span className="rounded-md bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400 px-2.5 py-1 text-xs font-medium border border-red-100 dark:border-red-900/20">Febre Alta</span>
-                      <span className="rounded-md bg-slate-50 text-slate-600 dark:bg-neutral-800 px-2.5 py-1 text-xs font-medium border border-slate-200/60 dark:border-neutral-700">Dor de Cabeça</span>
-                      <span className="rounded-md bg-slate-50 text-slate-600 dark:bg-neutral-800 px-2.5 py-1 text-xs font-medium border border-slate-200/60 dark:border-neutral-700">Dor no Corpo</span>
-                    </>
-                  )}
+                    ))}
+                  </div>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-xs font-semibold text-slate-400">Observações da Enfermagem</p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-neutral-800/40 rounded-lg p-3 border border-slate-100 dark:border-neutral-800 leading-relaxed">
+                    {currentPatient.symptoms}
+                  </p>
                 </div>
               </div>
-              <div className="sm:col-span-2">
-                <p className="text-xs font-semibold text-slate-400">Observações da Enfermagem</p>
-                <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-neutral-800/40 rounded-lg p-3 border border-slate-100 dark:border-neutral-800 leading-relaxed">
-                  {currentPatient?.symptoms || "Paciente relata que voltou de viagem ao Nordeste há 5 dias. Febre iniciou ontem à noite, 38.9°C."}
-                </p>
-              </div>
-            </div>
+            ) : (
+              <p className="text-sm text-slate-400 italic text-center py-6">Selecione um paciente na lista lateral para iniciar a consulta.</p>
+            )}
           </div>
 
           <form onSubmit={handleFinishAppointment} className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-xs space-y-5">
             <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase border-b border-neutral-100 dark:border-neutral-800 pb-2">Conduta Médica / Evolução e Prescrição</h3>
-            
-            <div className="space-y-2">
+            <div>
               <textarea
                 rows={6}
                 placeholder="Descreva a conduta clínica, diagnóstico, medicamentos prescritos, retorno e observações para o prontuário eletrônico..."
                 value={prescription}
                 onChange={(e) => setPrescription(e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-[#f8fafc] dark:bg-neutral-800 px-4 py-3 text-sm text-[#1e293b] dark:text-neutral-50 focus:border-blue-500 focus:bg-white focus:outline-none leading-relaxed"
+                disabled={!currentPatient}
+                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-[#f8fafc] dark:bg-neutral-800 px-4 py-3 text-sm text-[#1e293b] dark:text-neutral-50 focus:border-blue-500 focus:bg-white focus:outline-none leading-relaxed disabled:opacity-50"
                 required
               />
             </div>
-
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 font-semibold text-sm shadow-xs transition-colors cursor-pointer"
+                disabled={!currentPatient}
+                className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 font-semibold text-sm shadow-xs transition-colors cursor-pointer disabled:opacity-50"
               >
                 Finalizar Atendimento Padrão →
               </button>
@@ -142,17 +139,15 @@ export function DoctorPage() {
                 Inteligência Territorial
               </h3>
             </div>
-
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">Mapa da Microárea (Caucaia)</div>
-
             <div className="w-full h-56 mt-2 rounded-lg overflow-hidden">
               <RealGeographicMap />
             </div>
-            
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 text-white py-2.5 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+              disabled={!currentPatient}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 text-white py-2.5 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer disabled:opacity-50"
             >
               ⚠ Notificar Alerta Epidemiológico
             </button>
@@ -163,18 +158,46 @@ export function DoctorPage() {
               <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase">
                 Fila de Consultas
               </h3>
-              <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">1</span>
+              <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{queue.length}</span>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-2.5 rounded-lg border border-neutral-100 dark:border-neutral-800 bg-[#f8fafc] dark:bg-neutral-800/60 text-xs">
-                <div className="font-semibold text-slate-700 dark:text-neutral-200 truncate max-w-[140px]">
-                  {currentPatient ? currentPatient.name : "Maria Aparecida Santos"}
-                </div>
-                <span className="rounded px-2 py-0.5 font-bold text-[10px] uppercase bg-orange-100 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300">
-                  {currentSyndrome || "Síndrome Febril"}
-                </span>
+            {queue.length === 0 ? (
+              <p className="text-xs text-slate-400 italic text-center py-2">Nenhum paciente aguardando.</p>
+            ) : (
+              <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                {queue.map((patient, index) => {
+                  const isSelected = currentPatient?.name === patient.name;
+                  const syndrome = patient.syndromeLabel || "Síndrome Febril";
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => setCurrentPatient(patient)}
+                      className={`p-4 rounded-xl border transition-all cursor-pointer select-none space-y-2 bg-white dark:bg-neutral-900 ${
+                        isSelected 
+                          ? "border-blue-600 shadow-md ring-2 ring-blue-500/10" 
+                          : "border-neutral-200/70 hover:border-neutral-300 dark:border-neutral-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`h-2 w-2 rounded-full ${riskColors[patient.riskLevel] || "bg-blue-500"}`}></span>
+                        <div className="font-bold text-slate-800 dark:text-neutral-100 truncate text-sm">
+                          {patient.name}
+                        </div>
+                      </div>
+                      
+                      <div className="text-[11px] text-slate-400 font-medium">
+                        🕒 Chegada: {patient.arrivalInterv || "08:00"}
+                      </div>
+                      
+                      <div className="pt-0.5">
+                        <span className={`rounded-md px-2.5 py-0.5 font-bold text-[10px] uppercase border ${labelColors[syndrome] || labelColors["Síndrome Febril"]}`}>
+                          {syndrome}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+            )}
           </div>
 
         </div>
@@ -221,7 +244,7 @@ export function DoctorPage() {
               </svg>
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Microárea notificada</p>
-                <p className="text-sm font-bold text-slate-800 mt-0.5">Rua das Acácias, 314 — Jd. América</p>
+                <p className="text-sm font-bold text-slate-800 mt-0.5">Rua das Aces, 314 — Jd. América</p>
               </div>
             </div>
 
