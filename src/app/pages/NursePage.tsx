@@ -1,38 +1,36 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-
-interface PatientData {
-  name: string;
-  age: string;
-  document: string;
-  weight: string;
-  height: string;
-  bloodPressure: string;
-  heartRate: string;
-  temperature: string;
-  symptoms: string;
-  riskLevel: "blue" | "green" | "yellow" | "orange" | "red";
-}
+import { useAttendance } from "../context/AttendanceContext";
 
 export function NursePage() {
-  const [form, setForm] = useState<PatientData>({
+  const { addPatientToQueue } = useAttendance();
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
     name: "",
     age: "",
-    document: "",
-    weight: "",
-    height: "",
     bloodPressure: "",
     heartRate: "",
     temperature: "",
     symptoms: "",
-    riskLevel: "blue",
+    riskLevel: "blue" as "blue" | "green" | "yellow" | "orange" | "red",
   });
-
-  const navigate = useNavigate();
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    alert(`Triagem concluída! Paciente enviado para a fila do Médico.`);
+    
+    // Adiciona o paciente digitado na fila global
+    addPatientToQueue({
+      name: form.name,
+      age: form.age,
+      bloodPressure: form.bloodPressure,
+      heartRate: form.heartRate,
+      temperature: form.temperature,
+      symptoms: form.symptoms,
+      riskLevel: form.riskLevel,
+    });
+
+    alert(`Triagem concluída! ${form.name} foi enviado para a fila.`);
     navigate("/medico");
   }
 
@@ -68,7 +66,7 @@ export function NursePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">P.A. (mmHg)</label>
               <input
@@ -101,24 +99,6 @@ export function NursePage() {
                 onChange={(e) => setForm({ ...form, temperature: e.target.value })}
                 className="w-full rounded-md border border-border bg-input-background px-3 py-2 text-foreground focus:border-primary focus:outline-none"
                 required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Peso (kg)</label>
-              <input
-                type="number"
-                value={form.weight}
-                onChange={(e) => setForm({ ...form, weight: e.target.value })}
-                className="w-full rounded-md border border-border bg-input-background px-3 py-2 text-foreground focus:border-primary focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Altura (cm)</label>
-              <input
-                type="number"
-                value={form.height}
-                onChange={(e) => setForm({ ...form, height: e.target.value })}
-                className="w-full rounded-md border border-border bg-input-background px-3 py-2 text-foreground focus:border-primary focus:outline-none"
               />
             </div>
           </div>
