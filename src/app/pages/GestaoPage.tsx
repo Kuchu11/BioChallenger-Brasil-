@@ -31,6 +31,8 @@ interface FieldAction {
   vigilantePhone: string;
   quadras: string;
   focusText: string;
+  investigationStatus: "Pendente" | "Em Campo" | "Concluída";
+  teamResponsible: string;
 }
 
 export function GestaoPage() {
@@ -42,6 +44,10 @@ export function GestaoPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedCase, setSelectedCase] = useState<DetailedPatient | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const [isAuthInvestigationOpen, setIsAuthInvestigationOpen] = useState(false);
+  const [investigationPassword, setInvestigationPassword] = useState("");
+  const [selectedActionId, setSelectedActionId] = useState<string | null>(null);
 
   const [mapFocus, setMapFocus] = useState<[number, number] | undefined>(undefined);
   const [ubsName, setUbsName] = useState<string>("");
@@ -73,7 +79,7 @@ export function GestaoPage() {
     }
   ];
 
-  const fieldActionsList: FieldAction[] = [
+  const [fieldActionsList, setFieldActionsList] = useState<FieldAction[]>([
     {
       id: "1",
       location: "Jardim Esperança",
@@ -83,7 +89,9 @@ export function GestaoPage() {
       vigilanteName: "Carlos Souza (Vigilante 04)",
       vigilantePhone: "5585999999999",
       quadras: "Quadras A e B",
-      focusText: "Visitas de bloqueio e busca ativa residencial imediata nas quadras A e B."
+      focusText: "Visitas de bloqueio e busca ativa residencial imediata nas quadras A e B.",
+      investigationStatus: "Pendente",
+      teamResponsible: "Equipe Alfa - Vigilância Epidemiológica"
     },
     {
       id: "2",
@@ -94,9 +102,11 @@ export function GestaoPage() {
       vigilanteName: "Ana Beatriz (Vigilante 11)",
       vigilantePhone: "5585988888888",
       quadras: "Reservatórios da Zona Central",
-      focusText: "Eliminação de criadouros e aplicação de larvicidas em reservatórios."
+      focusText: "Eliminação de criadouros e aplicação de larvicidas em reservatórios.",
+      investigationStatus: "Em Campo",
+      teamResponsible: "Equipe de Controle de Endemias"
     }
-  ];
+  ]);
 
   const casesList: DetailedPatient[] = [
     {
@@ -127,7 +137,7 @@ export function GestaoPage() {
       syndrome: "Gastrointestinal",
       unit: "UBS Vila Nova",
       date: "02/07/2026",
-      details: "Quadro de diarreia agenda e desidratação leve. Coleta de amostra de água realizada na residência."
+      details: "Quadro de diarreia aguda e desidratação leve. Coleta de amostra de água realizada na residência."
     }
   ];
 
@@ -154,14 +164,41 @@ export function GestaoPage() {
   };
 
   const handleSendWhatsApp = (action: FieldAction) => {
-    const message = `🚨 *ALERTA SANITÁRIO — VIGILÂNCIA* \n\n` +
-                    `👤 *Vigilante Escalado:* ${action.vigilanteName}\n` +
-                    `📍 *Microárea:* ${action.location} (${action.quadras})\n` +
-                    `📋 *Síndrome:* ${action.syndrome}\n` +
-                    `💬 *Foco da Ação:* ${action.focusText}`;
+    const message = `🚨 *NOTIFICAÇÃO SANITÁRIA — VIGILANTE COMUNITÁRIO* \n\n` +
+                    `📍 *Área de Atuação:* ${action.location}\n` +
+                    `📋 *Atenção:* Aumento de notificações de Síndrome ${action.syndrome}.\n` +
+                    `💬 *Ação Local:* Preparar apoio territorial na comunidade local.`;
     
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://api.whatsapp.com/send?phone=${action.vigilantePhone}&text=${encodedMessage}`, "_blank");
+  };
+
+  const handleOpenInvestigationAuth = (id: string) => {
+    setSelectedActionId(id);
+    setIsAuthInvestigationOpen(true);
+    setInvestigationPassword("");
+  };
+
+  const handleConfirmInvestigation = () => {
+    if (!investigationPassword) {
+      alert("Por favor, insira sua senha de gestor para assinar a ordem.");
+      return;
+    }
+
+    if (selectedActionId) {
+      setFieldActionsList(prev => prev.map(action => {
+        if (action.id === selectedActionId) {
+          const nextStatus = action.investigationStatus === "Pendente" ? "Em Campo" : "Concluída";
+          return { ...action, investigationStatus: nextStatus };
+        }
+        return action;
+      }));
+      alert("Ordem de Investigação Epidemiológica de Campo assinada e despachada com sucesso!");
+    }
+
+    setIsAuthInvestigationOpen(false);
+    setSelectedActionId(null);
+    setInvestigationPassword("");
   };
 
   return (
@@ -381,25 +418,40 @@ export function GestaoPage() {
                       {action.notifications} notificações recentes • Síndrome: <span className="font-bold text-red-600">{action.syndrome}</span>
                     </p>
 
-                    <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-neutral-800/60 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-100 dark:border-neutral-700">
-                      <span>👤 Vigilante Setorial:</span>
-                      <span className="text-slate-700 dark:text-neutral-200 font-semibold">{action.vigilanteName}</span>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSendWhatsApp(action)}
+                        className="inline-flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-neutral-800/60 dark:text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-100 dark:border-neutral-700 cursor-pointer transition-colors"
+                      >
+                        💬 Alertar Vigilante: {action.vigilanteName.split(" ")[0]}
+                      </button>
+
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border ${
+                        action.investigationStatus === "Pendente" 
+                          ? "bg-amber-50 text-amber-700 border-amber-200" 
+                          : action.investigationStatus === "Em Campo"
+                          ? "bg-indigo-50 text-indigo-700 border-indigo-200 animate-pulse"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      }`}>
+                        🔬 Status: {action.investigationStatus}
+                      </div>
                     </div>
 
                     <div className="bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg border border-slate-100 dark:border-neutral-700 font-mono text-[11px] text-slate-600 dark:text-neutral-300 space-y-1">
-                      <p>🚨 *ALERTA SANITÁRIO — AGENTES DE SAÚDE*</p>
-                      <p>👤 Vigilante Escalado: *{action.vigilanteName}*</p>
-                      <p>📍 Microárea: *{action.location} (${action.quadras})*</p>
-                      <p>📋 Síndrome predominante: *{action.syndrome}*</p>
-                      <p>💬 Foco: {action.focusText}</p>
+                      <p>🚨 *ALERTA SANITÁRIO E INVESTIGAÇÃO DE SURTO*</p>
+                      <p>👥 Equipe de Estudo: *{action.teamResponsible}*</p>
+                      <p>📍 Local do Foco: *{action.location} ({action.quadras})*</p>
+                      <p>📋 Status Atual: *{action.investigationStatus === "Pendente" ? "Aguardando envio de técnicos" : action.investigationStatus === "Em Campo" ? "Técnicos realizando busca ativa e estudo de caso" : "Investigação territorial concluída"}*</p>
+                      <p>💬 Linha de Ação: {action.focusText}</p>
                     </div>
                   </div>
 
                   <button 
-                    onClick={() => handleSendWhatsApp(action)}
-                    className="bg-[#005c53] hover:bg-[#044c45] text-white font-bold text-xs px-4 py-2.5 rounded-lg inline-flex items-center gap-2 cursor-pointer shrink-0"
+                    onClick={() => handleOpenInvestigationAuth(action.id)}
+                    className="bg-[#1351b4] hover:bg-[#0f4192] text-white font-bold text-xs px-4 py-2.5 rounded-lg inline-flex items-center gap-2 cursor-pointer shrink-0 transition-colors shadow-xs"
                   >
-                    💬 Chamar Vigilante no WhatsApp
+                    🔬 Iniciar Investigação de Surto →
                   </button>
                 </div>
               ))}
@@ -412,7 +464,6 @@ export function GestaoPage() {
       {isModalOpen && selectedCase && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl space-y-5">
-            
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
@@ -500,6 +551,54 @@ export function GestaoPage() {
               </div>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {isAuthInvestigationOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-5">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 text-lg">
+                  📋
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Autorizar Ordem de Estudo</h3>
+                  <p className="text-xs text-slate-500 font-medium">Investigação Epidemiológica de Campo</p>
+                </div>
+              </div>
+              <button onClick={() => setIsAuthInvestigationOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
+            </div>
+
+            <div className="flex gap-3 rounded-xl bg-blue-50/80 p-4 border border-blue-100">
+              <p className="text-xs text-blue-800 font-medium leading-relaxed">
+                Ao confirmar com sua assinatura eletrônica, o sistema irá gerar a ordem oficial e despachar a equipe de campo para estudar a área do surto e realizar a busca ativa residencial.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-500 tracking-wider uppercase">Sua Senha de Gestor</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔒</span>
+                <input
+                  type="password"
+                  value={investigationPassword}
+                  onChange={(e) => setInvestigationPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full rounded-xl border border-neutral-200 bg-[#f8fafc] py-3 pl-10 pr-4 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button onClick={() => setIsAuthInvestigationOpen(false)} className="w-full rounded-xl border border-slate-200 py-3 font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">
+                Cancelar
+              </button>
+              <button onClick={handleConfirmInvestigation} className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 py-3 font-semibold text-sm text-white shadow-xs transition-colors cursor-pointer">
+                Assinar e Despachar
+              </button>
+            </div>
           </div>
         </div>
       )}
