@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 
 interface PatientData {
   name: string;
@@ -27,21 +28,12 @@ export function NursePage() {
     riskLevel: "blue",
   });
 
+  const navigate = useNavigate();
+
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    alert(`Triagem concluída! Risco: ${form.riskLevel.toUpperCase()}`);
-    setForm({
-      name: "",
-      age: "",
-      document: "",
-      weight: "",
-      height: "",
-      bloodPressure: "",
-      heartRate: "",
-      temperature: "",
-      symptoms: "",
-      riskLevel: "blue",
-    });
+    alert(`Triagem concluída! Paciente enviado para a fila do Médico.`);
+    navigate("/medico");
   }
 
   return (
