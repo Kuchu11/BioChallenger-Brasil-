@@ -21,6 +21,18 @@ interface UbsLocation {
   coordinates: [number, number];
 }
 
+interface FieldAction {
+  id: string;
+  location: string;
+  notifications: number;
+  syndrome: string;
+  severity: "Urgente" | "Alerta";
+  vigilanteName: string;
+  vigilantePhone: string;
+  quadras: string;
+  focusText: string;
+}
+
 export function GestaoPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"territorial" | "notificados" | "campo">("territorial");
@@ -57,7 +69,32 @@ export function GestaoPage() {
       name: "UBS São José",
       staff: "Sistema Offline",
       status: "offline",
-      coordinates: [-3.7355, -38.6545] as [number, number]
+      coordinates: [-3.7355, -38.6445] as [number, number]
+    }
+  ];
+
+  const fieldActionsList: FieldAction[] = [
+    {
+      id: "1",
+      location: "Jardim Esperança",
+      notifications: 28,
+      syndrome: "Respiratória",
+      severity: "Urgente",
+      vigilanteName: "Carlos Souza (Vigilante 04)",
+      vigilantePhone: "5585999999999",
+      quadras: "Quadras A e B",
+      focusText: "Visitas de bloqueio e busca ativa residencial imediata nas quadras A e B."
+    },
+    {
+      id: "2",
+      location: "Centro Histórico",
+      notifications: 41,
+      syndrome: "Febril",
+      severity: "Urgente",
+      vigilanteName: "Ana Beatriz (Vigilante 11)",
+      vigilantePhone: "5585988888888",
+      quadras: "Reservatórios da Zona Central",
+      focusText: "Eliminação de criadouros e aplicação de larvicidas em reservatórios."
     }
   ];
 
@@ -90,7 +127,7 @@ export function GestaoPage() {
       syndrome: "Gastrointestinal",
       unit: "UBS Vila Nova",
       date: "02/07/2026",
-      details: "Quadro de diarreia aguda e desidratação leve. Coleta de amostra de água realizada na residência."
+      details: "Quadro de diarreia agenda e desidratação leve. Coleta de amostra de água realizada na residência."
     }
   ];
 
@@ -114,6 +151,17 @@ export function GestaoPage() {
     setSelectedCase(null);
     setIsAuthenticated(false);
     setPassword("");
+  };
+
+  const handleSendWhatsApp = (action: FieldAction) => {
+    const message = `🚨 *ALERTA SANITÁRIO — VIGILÂNCIA* \n\n` +
+                    `👤 *Vigilante Escalado:* ${action.vigilanteName}\n` +
+                    `📍 *Microárea:* ${action.location} (${action.quadras})\n` +
+                    `📋 *Síndrome:* ${action.syndrome}\n` +
+                    `💬 *Foco da Ação:* ${action.focusText}`;
+    
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://api.whatsapp.com/send?phone=${action.vigilantePhone}&text=${encodedMessage}`, "_blank");
   };
 
   return (
@@ -315,56 +363,46 @@ export function GestaoPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-slate-800 dark:text-neutral-100">Microáreas Críticas Ativas</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Alertas de bloqueio territorial prontos para envio via WhatsApp</p>
+                <p className="text-xs text-slate-400 mt-0.5">Escalamento de Vigilância Comunitária por Área Crítica</p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-white dark:bg-neutral-900 border border-red-100 dark:border-neutral-800 rounded-xl p-5 shadow-xs flex flex-col md:flex-row justify-between gap-4 items-start">
-                <div className="space-y-3 w-full md:max-w-xl">
-                  <div className="flex items-center gap-2">
-                    <span className="text-red-500">📍</span>
-                    <h4 className="text-sm font-bold text-slate-800 dark:text-neutral-50">Jardim Esperança</h4>
-                    <span className="bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded text-[10px] uppercase">Urgente</span>
-                  </div>
-                  <p className="text-xs text-slate-400">28 notifications recentes • Síndrome: <span className="font-bold text-red-600">Respiratória</span></p>
-                  <div className="bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg border border-slate-100 dark:border-neutral-700 font-mono text-[11px] text-slate-600 dark:text-neutral-300 space-y-1">
-                    <p>🚨 *ALERTA SANITÁRIO — AGENTES DE SAÚDE*</p>
-                    <p>📍 Microárea: *Jardim Esperança*</p>
-                    <p>📋 Síndrome predominante: *Respiratória*</p>
-                    <p>💬 Foco: Visitas de bloqueio e busca ativa residencial imediata nas quadras A e B.</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => alert("Abrindo API do WhatsApp com o texto formatado do alerta...")}
-                  className="bg-[#005c53] hover:bg-[#044c45] text-white font-bold text-xs px-4 py-2.5 rounded-lg inline-flex items-center gap-2 cursor-pointer shrink-0"
-                >
-                  💬 Gerar Alerta WhatsApp
-                </button>
-              </div>
+              {fieldActionsList.map((action) => (
+                <div key={action.id} className="bg-white dark:bg-neutral-900 border border-slate-200/80 dark:border-neutral-800 rounded-xl p-5 shadow-xs flex flex-col md:flex-row justify-between gap-4 items-start">
+                  <div className="space-y-3 w-full md:max-w-xl">
+                    <div className="flex items-center gap-2">
+                      <span className="text-red-500">📍</span>
+                      <h4 className="text-sm font-bold text-slate-800 dark:text-neutral-50">{action.location}</h4>
+                      <span className="bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded text-[10px] uppercase">{action.severity}</span>
+                    </div>
+                    
+                    <p className="text-xs text-slate-400 font-medium">
+                      {action.notifications} notificações recentes • Síndrome: <span className="font-bold text-red-600">{action.syndrome}</span>
+                    </p>
 
-              <div className="bg-white dark:bg-neutral-900 border border-red-100 dark:border-neutral-800 rounded-xl p-5 shadow-xs flex flex-col md:flex-row justify-between gap-4 items-start">
-                <div className="space-y-3 w-full md:max-w-xl">
-                  <div className="flex items-center gap-2">
-                    <span className="text-red-500">📍</span>
-                    <h4 className="text-sm font-bold text-slate-800 dark:text-neutral-50">Centro Histórico</h4>
-                    <span className="bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded text-[10px] uppercase">Urgente</span>
+                    <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-neutral-800/60 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-100 dark:border-neutral-700">
+                      <span>👤 Vigilante Setorial:</span>
+                      <span className="text-slate-700 dark:text-neutral-200 font-semibold">{action.vigilanteName}</span>
+                    </div>
+
+                    <div className="bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg border border-slate-100 dark:border-neutral-700 font-mono text-[11px] text-slate-600 dark:text-neutral-300 space-y-1">
+                      <p>🚨 *ALERTA SANITÁRIO — AGENTES DE SAÚDE*</p>
+                      <p>👤 Vigilante Escalado: *{action.vigilanteName}*</p>
+                      <p>📍 Microárea: *{action.location} (${action.quadras})*</p>
+                      <p>📋 Síndrome predominante: *{action.syndrome}*</p>
+                      <p>💬 Foco: {action.focusText}</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-400">41 notifications recentes • Síndrome: <span className="font-bold text-amber-600">Febril</span></p>
-                  <div className="bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg border border-slate-100 dark:border-neutral-700 font-mono text-[11px] text-slate-600 dark:text-neutral-300 space-y-1">
-                    <p>🚨 *ALERTA SANITÁRIO — AGENTES DE SAÚDE*</p>
-                    <p>📍 Microárea: *Centro Histórico*</p>
-                    <p>📋 Síndrome predominante: *Febril / Suspeita de Dengue*</p>
-                    <p>💬 Foco: Eliminação de criadouros e aplicação de larvicidas em reservatórios.</p>
-                  </div>
+
+                  <button 
+                    onClick={() => handleSendWhatsApp(action)}
+                    className="bg-[#005c53] hover:bg-[#044c45] text-white font-bold text-xs px-4 py-2.5 rounded-lg inline-flex items-center gap-2 cursor-pointer shrink-0"
+                  >
+                    💬 Chamar Vigilante no WhatsApp
+                  </button>
                 </div>
-                <button 
-                  onClick={() => alert("Abrindo API do WhatsApp com o texto formatado do alerta...")}
-                  className="bg-[#005c53] hover:bg-[#044c45] text-white font-bold text-xs px-4 py-2.5 rounded-lg inline-flex items-center gap-2 cursor-pointer shrink-0"
-                >
-                  💬 Gerar Alerta WhatsApp
-                </button>
-              </div>
+              ))}
             </div>
           </div>
         )}
