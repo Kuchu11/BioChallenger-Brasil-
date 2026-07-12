@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAttendance } from "../context/AttendanceContext";
 
@@ -5,140 +6,315 @@ export function DoctorPage() {
   const { queue, currentPatient, callNextPatient } = useAttendance();
   const navigate = useNavigate();
 
-  const riskBadges = {
-    blue: "bg-blue-600 text-white",
-    green: "bg-green-600 text-white",
-    yellow: "bg-yellow-500 text-black",
-    orange: "bg-orange-500 text-white",
-    red: "bg-red-600 text-white",
+  // Estados dos campos do formulário do médico
+  const [prescription, setPrescription] = useState("");
+
+  // Estado do Modal de Notificação Epidemiológica
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [doctorPassword, setDoctorPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Lógica dinâmica para definir a síndrome do paciente atual baseado na triagem
+  const getSyndromeLabel = () => {
+    if (!currentPatient) return "";
+    
+    // Se veio da triagem com sintomas mapeados
+    const list = currentPatient.symptomsList || [];
+    const hasFebril = list.some(s => ["Febre Alta", "Dor de Cabeça", "Dor no Corpo"].includes(s));
+    const hasResp = list.some(s => ["Tosse", "Coriza", "Falta de Ar"].includes(s));
+    const hasGastro = list.some(s => ["Diarreia", "Vômito", "Dor Abdominal"].includes(s));
+
+    if ((hasFebril && hasResp) || (hasFebril && hasGastro) || (hasResp && hasGastro)) {
+      return "Síndrome Mista";
+    }
+    if (hasFebril) return "Síndrome Febril";
+    if (hasResp) return "Síndrome Respiratória";
+    if (hasGastro) return "Síndrome Gastrointestinal";
+    
+    return "Síndrome Febril"; // Fallback padrão do figma
   };
 
-  const riskLabels = {
-    blue: "Não Urgente",
-    green: "Pouco Urgente",
-    yellow: "Urgente",
-    orange: "Muito Urgente",
-    red: "Emergência",
+  const syndromeColors = {
+    "Síndrome Febril": "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-900/30",
+    "Síndrome Respiratória": "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/30",
+    "Síndrome Gastrointestinal": "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/30",
+    "Síndrome Mista": "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/30",
   };
+
+  const handleFinishAppointment = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(`Atendimento de ${currentPatient?.name || "Maria Aparecida Santos"} finalizado com sucesso!`);
+    setPrescription("");
+    navigate("/gestao");
+  };
+
+  const handleConfirmNotification = () => {
+    if (!doctorPassword) {
+      alert("Por favor, insira sua senha de confirmação médica.");
+      return;
+    }
+    alert("Notificação compulsória enviada em tempo real para a Vigilância Sanitária Municipal com sucesso!");
+    setIsModalOpen(false);
+    setDoctorPassword("");
+  };
+
+  const currentSyndrome = getSyndromeLabel() as keyof typeof syndromeColors;
 
   return (
-    <div className="min-h-screen bg-background dark:bg-neutral-950 p-6 transition-colors duration-200">
-      <div className="mx-auto max-w-5xl space-y-6">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 p-6 font-sans transition-colors duration-200">
+      <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-3">
         
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border dark:border-neutral-800 pb-4">
-          <div>
-            <h1 className="text-2xl font-medium text-foreground dark:text-neutral-50">Consultório Médico</h1>
-            <p className="text-sm text-muted-foreground dark:text-neutral-400 mt-1">Atendimento clínico e prescrição de prontuários</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-950/40 px-3 py-1 text-xs font-semibold text-blue-800 dark:text-blue-300">
-              {queue.length} paciente(s) na fila
-            </span>
-            <button
-              onClick={callNextPatient}
-              disabled={queue.length === 0}
-              className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm focus:outline-none cursor-pointer"
-            >
-              Chamar Próximo
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* COLUNA ESQUERDA E CENTRAL: FORMULÁRIO MÉDICO E DADOS DO PACIENTE */}
+        <div className="lg:col-span-2 space-y-6">
           
-          <div className="rounded-lg border border-border dark:border-neutral-800 bg-card dark:bg-neutral-900 p-6 shadow-sm lg:col-span-2 space-y-6">
-            <div className="flex items-start justify-between">
+          {/* Box do Paciente Atendido */}
+          <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-xs">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-neutral-100 dark:border-neutral-800 pb-4 mb-4">
               <div>
-                <h3 className="text-lg font-medium text-foreground dark:text-neutral-50">
-                  {currentPatient ? currentPatient.name : "Nenhum paciente em atendimento"}
-                </h3>
-                {currentPatient && (
-                  <p className="text-sm text-muted-foreground dark:text-neutral-400 mt-0.5">{currentPatient.age} anos</p>
-                )}
+                <p className="text-xs font-bold text-[#64748b] dark:text-neutral-400 tracking-wider uppercase">Paciente em Atendimento</p>
+                <h2 className="text-xl font-bold text-[#1e293b] dark:text-neutral-50 mt-0.5">
+                  {currentPatient ? currentPatient.name : "Maria Aparecida Santos"}
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">42 anos • CPF 342.891.020-15</p>
               </div>
-              {currentPatient && (
-                <span className={`rounded-md px-3 py-1 text-xs font-bold uppercase tracking-wide ${riskBadges[currentPatient.riskLevel]}`}>
-                  {riskLabels[currentPatient.riskLevel]}
-                </span>
-              )}
+              <span className={`rounded-full px-3 py-1 text-xs font-bold border ${syndromeColors[currentSyndrome] || syndromeColors["Síndrome Febril"]}`}>
+                ⚡ {currentSyndrome || "Síndrome Febril"}
+              </span>
             </div>
 
-            {currentPatient ? (
-              <>
-                <div className="grid grid-cols-3 gap-4 border-t border-b border-border dark:border-neutral-800 py-4">
-                  <div className="text-center">
-                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-neutral-400">Pressão Arterial</p>
-                    <p className="mt-1 text-lg font-semibold text-foreground dark:text-neutral-50">{currentPatient.bloodPressure} <span className="text-xs font-normal text-muted-foreground">mmHg</span></p>
-                  </div>
-                  <div className="text-center border-x border-border dark:border-neutral-800">
-                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-neutral-400">Freq. Cardíaca</p>
-                    <p className="mt-1 text-lg font-semibold text-foreground dark:text-neutral-50">{currentPatient.heartRate} <span className="text-xs font-normal text-muted-foreground">bpm</span></p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-neutral-400">Temperatura</p>
-                    <p className="mt-1 text-lg font-semibold text-foreground dark:text-neutral-50">{currentPatient.temperature} <span className="text-xs font-normal text-muted-foreground">°C</span></p>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-foreground dark:text-neutral-200 mb-1">Queixa Principal / Sintomas Relatados:</h4>
-                  <p className="text-sm text-muted-foreground dark:text-neutral-300 bg-input-background dark:bg-neutral-800 rounded-md p-3 border border-border dark:border-neutral-700 leading-relaxed">
-                    {currentPatient.symptoms}
-                  </p>
-                </div>
-
-                <div className="space-y-3 pt-2">
-                  <label className="block text-sm font-medium text-foreground dark:text-neutral-200">Evolução Clínica / Prescrição Médica</label>
-                  <textarea
-                    rows={4}
-                    placeholder="Digite os achados clínicos, diagnóstico e medicamentos receitados..."
-                    className="w-full rounded-md border border-border dark:border-neutral-700 bg-input-background dark:bg-neutral-800 px-3 py-2 text-foreground dark:text-neutral-50 focus:border-primary focus:outline-none text-sm placeholder-neutral-400 dark:placeholder-neutral-500"
-                  />
-                </div>
-
-                <button
-                  onClick={() => {
-                    alert("Atendimento finalizado com sucesso! Relatório enviado para o Painel de Gestão.");
-                    navigate("/gestao");
-                  }}
-                  className="w-full rounded-md bg-primary py-2.5 font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none text-sm cursor-pointer"
-                >
-                  Finalizar Atendimento e Enviar para Gestão
-                </button>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-muted-foreground dark:text-neutral-500 mb-3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                </svg>
-                <p className="text-sm font-medium text-muted-foreground dark:text-neutral-400">Aguardando o acionamento do botão "Chamar Próximo" para iniciar.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-xs font-semibold text-slate-400">CPF</p>
+                <p className="font-medium text-slate-700 dark:text-slate-300 mt-0.5">{currentPatient?.cpf || "342.891.020-15"}</p>
               </div>
-            )}
+              <div>
+                <p className="text-xs font-semibold text-slate-400">Cartão SUS</p>
+                <p className="font-medium text-slate-700 dark:text-slate-300 mt-0.5">{currentPatient?.susCard || "7081 2034 9871"}</p>
+              </div>
+              <div className="sm:col-span-2">
+                <p className="text-xs font-semibold text-slate-400 mb-1.5">Sintomas Identificados na Triagem</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {currentPatient?.symptomsList && currentPatient.symptomsList.length > 0 ? (
+                    currentPatient.symptomsList.map((symptom, idx) => (
+                      <span key={idx} className="rounded-md bg-slate-100 dark:bg-neutral-800 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-neutral-300 border border-slate-200/40 dark:border-neutral-700/50">
+                        {symptom}
+                      </span>
+                    ))
+                  ) : (
+                    <>
+                      <span className="rounded-md bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400 px-2.5 py-1 text-xs font-medium border border-red-100 dark:border-red-900/20">Febre Alta</span>
+                      <span className="rounded-md bg-slate-50 text-slate-600 dark:bg-neutral-800 px-2.5 py-1 text-xs font-medium border border-slate-200/60 dark:border-neutral-700">Dor de Cabeça</span>
+                      <span className="rounded-md bg-slate-50 text-slate-600 dark:bg-neutral-800 px-2.5 py-1 text-xs font-medium border border-slate-200/60 dark:border-neutral-700">Dor no Corpo</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="sm:col-span-2">
+                <p className="text-xs font-semibold text-slate-400">Observações da Enfermagem</p>
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-neutral-800/40 rounded-lg p-3 border border-slate-100 dark:border-neutral-800 leading-relaxed">
+                  {currentPatient?.symptoms || "Paciente relata que voltou de viagem ao Nordeste há 5 dias. Febre iniciou ontem à noite, 38.9°C."}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-lg border border-border dark:border-neutral-800 bg-card dark:bg-neutral-900 p-6 shadow-sm lg:col-span-1 space-y-4">
-            <h3 className="text-base font-medium text-foreground dark:text-neutral-50 border-b border-border dark:border-neutral-800 pb-2">Fila de Espera Geral</h3>
-            {queue.length === 0 ? (
-              <p className="text-xs text-muted-foreground dark:text-neutral-400 italic text-center py-4">Nenhum paciente aguardando.</p>
-            ) : (
-              <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
-                {queue.map((patient, index) => (
-                  <div key={index} className="flex items-center justify-between p-2.5 rounded-md border border-border dark:border-neutral-700 bg-input-background dark:bg-neutral-800 text-xs">
-                    <div className="font-medium text-foreground dark:text-neutral-200 truncate max-w-[120px]">
-                      {patient.name}
-                    </div>
-                    <span className={`rounded px-2 py-0.5 font-semibold text-[10px] uppercase ${riskBadges[patient.riskLevel]}`}>
-                      {riskLabels[patient.riskLevel]}
-                    </span>
-                  </div>
-                ))}
+          {/* Formulário de Conduta Médica */}
+          <form onSubmit={handleFinishAppointment} className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-xs space-y-5">
+            <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase border-b border-neutral-100 dark:border-neutral-800 pb-2">Conduta Médica / Evolução e Prescrição</h3>
+            
+            <div className="space-y-2">
+              <textarea
+                rows={6}
+                placeholder="Descreva a conduta clínica, diagnóstico, medicamentos prescritos, retorno e observações para o prontuário eletrônico..."
+                value={prescription}
+                onChange={(e) => setPrescription(e.target.value)}
+                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-[#f8fafc] dark:bg-neutral-800 px-4 py-3 text-sm text-[#1e293b] dark:text-neutral-50 focus:border-blue-500 focus:bg-white focus:outline-none leading-relaxed"
+                required
+              />
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="submit"
+                className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 font-semibold text-sm shadow-xs transition-colors cursor-pointer"
+              >
+                Finalizar Atendimento Padrão →
+              </button>
+            </div>
+          </form>
+
+        </div>
+
+        {/* COLUNA DIREITA: INTELIGÊNCIA TERRITORIAL (MAPA) E FILA */}
+        <div className="space-y-6">
+          
+          {/* Box do Mapa Territorial de Surtos */}
+          <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-2">
+              <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase flex items-center gap-1.5">
+                Inteligência Territorial
+              </h3>
+            </div>
+
+            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">Mapa da Microárea</div>
+
+            {/* Simulação do gráfico/mapa quadriculado do seu Figma */}
+            <div className="relative h-44 rounded-lg bg-slate-50 dark:bg-neutral-800 border border-slate-200/60 dark:border-neutral-700 overflow-hidden p-2 grid grid-cols-3 grid-rows-3 gap-1">
+              <div className="border border-red-200 bg-red-100/50 dark:border-red-950/40 rounded flex items-center justify-center relative">
+                <span className="absolute h-3 w-3 rounded-full bg-red-500 border border-white animate-pulse"></span>
               </div>
-            )}
+              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
+              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
+              <div className="border border-red-100 bg-red-50/30 dark:border-neutral-800 rounded"></div>
+              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
+              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
+              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
+              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
+              <div className="border border-slate-200/60 bg-slate-100/40 dark:border-neutral-800 rounded"></div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-neutral-200">
+                <span className="h-2 w-2 rounded-full bg-red-500"></span> Surto ativo nesta microárea
+              </div>
+              <div className="text-[11px] text-slate-400 dark:text-neutral-300 bg-slate-50 dark:bg-neutral-800 px-2 py-1.5 rounded border border-slate-100 dark:border-neutral-700">
+                Rua das Acácias, 314 — Jd. América
+              </div>
+              <div className="w-full text-center text-[10px] bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400 font-bold uppercase py-1 rounded border border-red-200/40 tracking-wider">
+                ● ALTO RISCO — surto confirmado na microárea
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 text-white py-2.5 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              ⚠ Notificar Alerta Epidemiológico
+            </button>
+          </div>
+
+          {/* Fila de Consultas Lateral */}
+          <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 shadow-xs space-y-3">
+            <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-2">
+              <h3 className="text-xs font-bold text-[#475569] dark:text-neutral-400 tracking-wider uppercase">
+                Fila de Consultas
+              </h3>
+              <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">1</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2.5 rounded-lg border border-neutral-100 dark:border-neutral-800 bg-[#f8fafc] dark:bg-neutral-800/60 text-xs">
+                <div className="font-semibold text-slate-700 dark:text-neutral-200 truncate max-w-[140px]">
+                  {currentPatient ? currentPatient.name : "Maria Aparecida Santos"}
+                </div>
+                <span className="rounded px-2 py-0.5 font-bold text-[10px] uppercase bg-orange-100 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300">
+                  {currentSyndrome || "Síndrome Febril"}
+                </span>
+              </div>
+            </div>
           </div>
 
         </div>
 
       </div>
+
+      {/* MODAL DE CONFIRMAÇÃO DE NOTIFICAÇÃO COMPULSÓRIA */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            
+            {/* Header do Modal */}
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Confirmação de Notificação Compulsória</h3>
+                  <p className="text-xs text-slate-500 font-medium">Dr. Ricardo Almeida · CRM 54.302-SP</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { setIsModalOpen(false); setDoctorPassword(""); }}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Caixa de Alerta Vermelha */}
+            <div className="flex gap-3 rounded-xl bg-red-50/80 p-4 border border-red-100">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-red-600 shrink-0 mt-0.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+              </svg>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                <span className="font-bold text-red-700">Atenção:</span> Esta ação enviará um alerta em tempo real para o Painel da Gestão Municipal / Vigilância Sanitária sobre uma alteração sanitária nesta microárea. <span className="font-bold text-red-700">Esta ação será auditada</span> e vinculada ao seu CRM.
+              </p>
+            </div>
+
+            {/* Caixa da Microárea Notificada */}
+            <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-blue-600">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+              </svg>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Microárea notificada</p>
+                <p className="text-sm font-bold text-slate-800 mt-0.5">Rua das Acácias, 314 — Jd. América</p>
+              </div>
+            </div>
+
+            {/* Campo da Senha */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-500 tracking-wider uppercase">Senha do Médico Responsável</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                  </svg>
+                </span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={doctorPassword}
+                  onChange={(e) => setDoctorPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full rounded-xl border border-neutral-200 bg-[#f8fafc] py-3 pl-10 pr-10 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
+            </div>
+
+            {/* Botões de Ação */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => { setIsModalOpen(false); setDoctorPassword(""); }}
+                className="w-full rounded-xl border border-slate-200 py-3 font-semibold text-sm text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmNotification}
+                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-700 py-3 font-semibold text-sm text-white shadow-xs transition-colors cursor-pointer"
+              >
+                ⚠ Confirmar e Notificar Gestão
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
