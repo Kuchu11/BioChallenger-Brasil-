@@ -11,6 +11,8 @@ interface DetailedPatient {
   unit: string;
   date: string;
   details: string;
+  atendidoPorEnf: string;
+  atendidoPorMed: string;
 }
 
 interface UbsLocation {
@@ -115,7 +117,9 @@ export function GestaoPage() {
       syndrome: "IRA / Respiratória",
       unit: "UBS Centro",
       date: "03/07/2026",
-      details: "Paciente apresentou tosse produtiva, coriza e relato de febre há 3 dias. Microárea sob monitoramento de surto."
+      details: "Paciente apresentou tosse produtiva, coriza e relato de febre há 3 dias. Microárea sob monitoramento de surto.",
+      atendidoPorEnf: "Enf. Amanda Lima (Coren-CE 123.456)",
+      atendidoPorMed: "Dr. Marcos Rocha (CRM-CE 78910)"
     },
     {
       id: "ALT-2026-0892",
@@ -125,7 +129,9 @@ export function GestaoPage() {
       syndrome: "Febril / Dengue-like",
       unit: "UBS Jardim Esperança",
       date: "03/07/2026",
-      details: "Febre alta súbita, cefaleia e dores retro-orbitárias. Busca ativa de criadouros iniciada no quarteirão."
+      details: "Febre alta súbita, cefaleia e dores retro-orbitárias. Busca ativa de criadouros iniciada no quarteirão.",
+      atendidoPorEnf: "Enf. Pedro Souza (Coren-CE 654.321)",
+      atendidoPorMed: "Dra. Juliana Mendes (CRM-CE 11223)"
     },
     {
       id: "ALT-2026-0893",
@@ -135,7 +141,9 @@ export function GestaoPage() {
       syndrome: "Gastrointestinal",
       unit: "UBS Vila Nova",
       date: "02/07/2026",
-      details: "Quadro de diarreia aguda e desidratação leve. Coleta de amostra de água realizada na residência."
+      details: "Quadro de diarreia aguda e desidratação leve. Coleta de amostra de água realizada na residência.",
+      atendidoPorEnf: "Enf. Amanda Lima (Coren-CE 123.456)",
+      atendidoPorMed: "Dr. Marcos Rocha (CRM-CE 78910)"
     }
   ];
 
@@ -525,6 +533,16 @@ export function GestaoPage() {
                   <div>
                     <p className="font-bold text-slate-400 uppercase">Cartão SUS</p>
                     <p className="text-sm font-bold text-slate-800 mt-0.5">{selectedCase.susCard}</p>
+                  </div>
+                  <div className="border-t border-slate-200/60 pt-3 col-span-2 grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="font-bold text-slate-400 uppercase">Enfermeiro(a) Responsável</p>
+                      <p className="text-xs font-semibold text-slate-700 mt-0.5">{selectedCase.atendidoPorEnf}</p>
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-400 uppercase">Médico(a) Plantonista</p>
+                      <p className="text-xs font-semibold text-slate-700 mt-0.5">{selectedCase.atendidoPorMed}</p>
+                    </div>
                   </div>
                 </div>
 
